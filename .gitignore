@@ -1,0 +1,41 @@
+# myOS .gitignore
+
+# Secrets — NEVER commit these
+.env
+.env.local
+.env.*
+secrets.json
+api-keys.txt
+*.key
+
+# Memory profile — contains personal health data
+onboarding/my-memory-profile.txt
+onboarding/exported-profile.txt
+memory-profile.md
+
+# Airtable credentials
+airtable-config.json
+airtable-api-key.txt
+
+# Make/Integromat exports with credentials
+make-scenarios/*.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if used later)
+node_modules/
+npm-debug.log
+
+# Build outputs
+dist/
+build/
+.cache/

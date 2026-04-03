@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>myOS — Onboarding</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #534AB7;
+    --purple-light: #EEEDFE;
+    --purple-mid: #AFA9EC;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --teal-mid: #5DCAA5;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --gray: #5F5E5A;
+    --gray-light: #F1EFE8;
+    --text: #1A1A1A;
+    --text-muted: #6B6867;
+    --text-hint: #9B9895;
+    --border: #E0DDD8;
+    --bg: #FFFFFF;
+    --bg-surface: #F7F6F3;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-pill: 999px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg-surface);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 580px;
+  }
+
+  /* HEADER */
+  .header {
+    margin-bottom: 2rem;
+  }
+  .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--purple);
+    letter-spacing: -0.5px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* PROGRESS */
+  .progress {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .prog-track {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.25s;
+  }
+  .prog-fill.done { background: var(--teal-mid); }
+  .prog-fill.active { background: var(--purple); }
+  .prog-label {
+    font-size: 12px;
+    color: var(--text-hint);
+    white-space: nowrap;
+    min-width: 64px;
+    text-align: right;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    margin-top: 1rem;
+  }
+
+  /* STEP VISIBILITY */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* STEP HEADER */
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--purple);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .step-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .step-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+  }
+
+  /* FIELDS */
+  .field { margin-bottom: 1.25rem; }
+  .field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 5px;
+  }
+  .field-hint {
+    display: block;
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--purple-mid);
+    box-shadow: 0 0 0 3px rgba(83,74,183,0.08);
+  }
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+  }
+
+  /* CHIPS */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .chip:hover {
+    border-color: #C0BDDB;
+    color: var(--text);
+    background: var(--purple-light);
+  }
+  .chip.selected {
+    background: var(--purple-light);
+    color: var(--purple);
+    border-color: var(--purple-mid);
+    font-weight: 500;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.25rem 0;
+  }
+
+  /* PEOPLE ROWS */
+  .person-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+  .person-row input:first-child { flex: 1; }
+  .person-row input:nth-child(2) { flex: 1.8; }
+  .remove-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-hint);
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+  .remove-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+  .add-btn {
+    font-size: 13px;
+    color: var(--purple);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 0;
+    font-weight: 500;
+  }
+  .add-btn:hover { text-decoration: underline; }
+
+  /* ACTIONS */
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 2rem;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+  }
+  .btn-primary {
+    padding: 11px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: white;
+    background: var(--purple);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: #3C3489; }
+  .btn-secondary {
+    padding: 11px 16px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { background: var(--bg-surface); border-color: #C0BDDB; }
+  .btn-skip {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-hint);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-skip:hover { color: var(--text-muted); text-decoration: underline; }
+
+  /* SUMMARY */
+  .summary-block {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .sum-row {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+  }
+  .sum-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .sum-row:first-child { padding-top: 0; }
+  .sum-key {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    width: 80px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .sum-val {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    flex: 1;
+  }
+  .sum-tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 9px;
+    border-radius: var(--radius-pill);
+    background: var(--purple-light);
+    color: var(--purple);
+    margin: 2px 3px 2px 0;
+    font-weight: 500;
+  }
+
+  /* LAUNCH BLOCK */
+  .launch-block {
+    background: var(--teal-light);
+    border: 1px solid var(--teal-mid);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .launch-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 5px;
+  }
+  .launch-text { font-size: 13px; color: var(--teal); line-height: 1.6; }
+
+  .btn-launch {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    color: white;
+    background: var(--purple);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-launch:hover { background: #3C3489; }
+
+  /* EXPORT OUTPUT */
+  .export-box {
+    display: none;
+    margin-top: 1.5rem;
+    background: #1A1A1A;
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    position: relative;
+  }
+  .export-box.show { display: block; }
+  .export-box pre {
+    font-size: 12px;
+    color: #C0BDDB;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.6;
+    font-family: "SF Mono", "Fira Code", monospace;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 12px;
+    padding: 5px 10px;
+    background: #534AB7;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .copy-btn:hover { background: #3C3489; }
+
+  @media (max-width: 480px) {
+    body { padding: 1rem 0.75rem 3rem; }
+    .card { padding: 1.25rem; }
+    .person-row { flex-wrap: wrap; }
+    .person-row input { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="logo">myOS</div>
+    <div class="progress">
+      <div class="prog-track"><div class="prog-fill active" id="p1"></div></div>
+      <div class="prog-track"><div class="prog-fill" id="p2"></div></div>
+      <div class="prog-track"><div class="prog-fill" id="p3"></div></div>
+      <div class="prog-track"><div class="prog-fill" id="p4"></div></div>
+      <div class="prog-track"><div class="prog-fill" id="p5"></div></div>
+      <div class="prog-track"><div class="prog-fill" id="p6"></div></div>
+      <span class="prog-label" id="prog-label">Step 1 of 6</span>
+    </div>
+  </div>
+
+  <!-- ─── STEP 1: YOU ─── -->
+  <div class="card step active" id="s1">
+    <div class="eyebrow">myOS onboarding</div>
+    <div class="step-title">Let's start with you.</div>
+    <div class="step-sub">This isn't a form. It's the first act of building your external memory. Everything here seeds the Memory Agent — the smarter you are now, the smarter myOS is from day one.</div>
+
+    <div class="field">
+      <label class="field-label">Your name</label>
+      <input type="text" id="f-name" placeholder="What myOS calls you">
+    </div>
+    <div class="field">
+      <label class="field-label">Your city</label>
+      <input type="text" id="f-city" placeholder="Austin, TX">
+    </div>
+    <div class="field">
+      <label class="field-label">What's going on in your life right now?</label>
+      <span class="field-hint">One or two sentences. Whatever comes to mind first.</span>
+      <textarea id="f-life" placeholder="Building myOS, planning Coachella, trying to get my memory back..."></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">What does your brain need most right now?</label>
+      <span class="field-hint">Select all that apply.</span>
+      <div class="chip-group" id="cg-brain">
+        <button class="chip multi" data-group="brain">to not forget things</button>
+        <button class="chip multi" data-group="brain">to not feel overwhelmed</button>
+        <button class="chip multi" data-group="brain">to show up for people</button>
+        <button class="chip multi" data-group="brain">to hold onto good memories</button>
+        <button class="chip multi" data-group="brain">to manage my health</button>
+        <button class="chip multi" data-group="brain">all of the above</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="goTo(2)">Continue</button>
+      <button class="btn-skip" onclick="goTo(2)">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 2: HEALTH ─── -->
+  <div class="card step" id="s2">
+    <div class="eyebrow">health & wellbeing</div>
+    <div class="step-title">Let myOS carry your health admin.</div>
+    <div class="step-sub">Prescriptions renewed. Appointments booked. Enough lead time that you're never scrambling. myOS is not a medical tool — it's the system that makes sure nothing in your health routine ever slips.</div>
+
+    <div class="field">
+      <label class="field-label">Medications you take regularly</label>
+      <span class="field-hint">Name, dose, how often. myOS tracks renewal windows automatically.</span>
+      <textarea id="f-meds" placeholder="Keppra 500mg twice daily · Vitamin D once daily..."></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Your regular doctors or specialists</label>
+      <span class="field-hint">Name and what they're for. myOS tracks appointment cadences.</span>
+      <textarea id="f-docs" placeholder="Dr. Patel — neurology · Dr. Chen — GP..."></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">How far ahead for health reminders?</label>
+      <div class="chip-group" id="cg-hlead">
+        <button class="chip single" data-group="hlead">1 week</button>
+        <button class="chip single selected" data-group="hlead">2 weeks</button>
+        <button class="chip single" data-group="hlead">1 month</button>
+        <button class="chip single" data-group="hlead">as early as possible</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Anything else myOS should know about your health?</label>
+      <span class="field-hint">Optional. Private. Only used to inform how myOS looks after you.</span>
+      <textarea id="f-hother" placeholder="Epilepsy — memory degrades over time due to medication. I need myOS to compensate and grow with me..." style="min-height:60px"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="goTo(1)">Back</button>
+      <button class="btn-primary" onclick="goTo(3)">Continue</button>
+      <button class="btn-skip" onclick="goTo(3)">Skip</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 3: PEOPLE ─── -->
+  <div class="card step" id="s3">
+    <div class="eyebrow">people who matter</div>
+    <div class="step-title">Who do you want to show up for?</div>
+    <div class="step-sub">Birthdays, anniversaries, just checking in — myOS tracks the people you care about and makes sure you never go silent on them by accident.</div>
+
+    <div class="field">
+      <label class="field-label">People and their important dates</label>
+      <div id="people-list">
+        <div class="person-row">
+          <input type="text" placeholder="Name">
+          <input type="text" placeholder="Birthday · anniversary · what to remember">
+          <button class="remove-btn" onclick="removePerson(this)" title="Remove">×</button>
+        </div>
+        <div class="person-row">
+          <input type="text" placeholder="Name">
+          <input type="text" placeholder="Birthday · anniversary · what to remember">
+          <button class="remove-btn" onclick="removePerson(this)" title="Remove">×</button>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addPerson()">+ Add another person</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <label class="field-label">Birthday reminder lead time</label>
+      <div class="chip-group" id="cg-blead">
+        <button class="chip single" data-group="blead">1 week</button>
+        <button class="chip single selected" data-group="blead">2 weeks</button>
+        <button class="chip single" data-group="blead">1 month</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Gift style — how myOS picks ideas</label>
+      <span class="field-hint">Select all that apply.</span>
+      <div class="chip-group" id="cg-gift">
+        <button class="chip multi selected" data-group="gift">experience-led</button>
+        <button class="chip multi selected" data-group="gift">thoughtful over expensive</button>
+        <button class="chip multi" data-group="gift">local and bookable</button>
+        <button class="chip multi selected" data-group="gift">never generic</button>
+        <button class="chip multi" data-group="gift">ask me each time</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="goTo(2)">Back</button>
+      <button class="btn-primary" onclick="goTo(4)">Continue</button>
+      <button class="btn-skip" onclick="goTo(4)">Skip</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 4: CULTURE ─── -->
+  <div class="card step" id="s4">
+    <div class="eyebrow">your culture layer</div>
+    <div class="step-title">What moves you?</div>
+    <div class="step-sub">myOS treats your cultural life as seriously as your admin life. Who you listen to, what you attend, what matters creatively — all tracked, all surfaced before you have to go looking.</div>
+
+    <div class="field">
+      <label class="field-label">Artists you follow closely</label>
+      <span class="field-hint">myOS alerts you the moment new releases, tour dates, or festival appearances drop.</span>
+      <textarea id="f-artists" placeholder="Frank Ocean, Khruangbin, Tame Impala, Four Tet, Floating Points..."></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Festivals you go to or want to track</label>
+      <textarea id="f-festivals" placeholder="Coachella, ACL, Primavera Sound..." style="min-height:60px"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">What should myOS track culturally?</label>
+      <span class="field-hint">Select all that apply.</span>
+      <div class="chip-group" id="cg-cult">
+        <button class="chip multi selected" data-group="cult">new album drops</button>
+        <button class="chip multi selected" data-group="cult">tour announcements</button>
+        <button class="chip multi selected" data-group="cult">festival lineups</button>
+        <button class="chip multi selected" data-group="cult">setlist leaks</button>
+        <button class="chip multi" data-group="cult">art exhibitions</button>
+        <button class="chip multi" data-group="cult">film releases</button>
+        <button class="chip multi" data-group="cult">sports events</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Spotify</label>
+      <div class="chip-group" id="cg-spotify">
+        <button class="chip single" data-group="spotify">sync my Spotify library</button>
+        <button class="chip single selected" data-group="spotify">I'll add artists manually for now</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="goTo(3)">Back</button>
+      <button class="btn-primary" onclick="goTo(5)">Continue</button>
+      <button class="btn-skip" onclick="goTo(5)">Skip</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 5: LIFE ADMIN ─── -->
+  <div class="card step" id="s5">
+    <div class="eyebrow">life admin</div>
+    <div class="step-title">The stuff living in the back of your mind.</div>
+    <div class="step-sub">Car service, passport expiry, subscriptions, renewals. Never urgent until suddenly critical. Let's move them out of your head permanently.</div>
+
+    <div class="field">
+      <label class="field-label">Your car</label>
+      <span class="field-hint">Make, model, last service date if you know it. myOS tracks service intervals.</span>
+      <input type="text" id="f-car" placeholder="2021 Toyota Camry · last service Feb 8 2026 · Jiffy Lube South Lamar">
+    </div>
+    <div class="field">
+      <label class="field-label">Passport expiry</label>
+      <input type="text" id="f-passport" placeholder="Aug 2026">
+    </div>
+    <div class="field">
+      <label class="field-label">Anything else due for renewal or attention?</label>
+      <textarea id="f-admin" placeholder="Home insurance renews June · gym membership · annual dental..." style="min-height:60px"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Preferred appointment time</label>
+      <div class="chip-group" id="cg-appt">
+        <button class="chip single selected" data-group="appt">morning — before noon</button>
+        <button class="chip single" data-group="appt">afternoon</button>
+        <button class="chip single" data-group="appt">no preference</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Preferred service providers</label>
+      <span class="field-hint">So myOS always books where you already trust.</span>
+      <textarea id="f-providers" placeholder="Jiffy Lube South Lamar · Walgreens on Lamar · Dr Patel at UT Dell Medical..." style="min-height:60px"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="goTo(4)">Back</button>
+      <button class="btn-primary" onclick="goTo(6)">Review & launch</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 6: SUMMARY ─── -->
+  <div class="card step" id="s6">
+    <div class="eyebrow">ready to launch</div>
+    <div class="step-title">Your memory, captured.</div>
+    <div class="step-sub">Here's what myOS knows about you right now. This becomes the seed of your Memory Agent — it grows richer every single day from here.</div>
+
+    <div class="summary-block">
+      <div class="sum-row">
+        <div class="sum-key">You</div>
+        <div class="sum-val" id="sum-you">—</div>
+      </div>
+      <div class="sum-row">
+        <div class="sum-key">Health</div>
+        <div class="sum-val" id="sum-health">—</div>
+      </div>
+      <div class="sum-row">
+        <div class="sum-key">People</div>
+        <div class="sum-val" id="sum-people">—</div>
+      </div>
+      <div class="sum-row">
+        <div class="sum-key">Culture</div>
+        <div class="sum-val" id="sum-culture">—</div>
+      </div>
+      <div class="sum-row">
+        <div class="sum-key">Admin</div>
+        <div class="sum-val" id="sum-admin">—</div>
+      </div>
+    </div>
+
+    <div class="launch-block">
+      <div class="launch-label">what happens next</div>
+      <div class="launch-text">Copy your memory profile below and paste it into Airtable or share it with your AI assistant to seed your Memory Agent. This is day one of getting your memory back.</div>
+    </div>
+
+    <button class="btn-launch" onclick="exportProfile()">Export my memory profile</button>
+
+    <div class="export-box" id="export-box">
+      <button class="copy-btn" onclick="copyExport()">Copy</button>
+      <pre id="export-text"></pre>
+    </div>
+
+    <div class="actions" style="margin-top:1rem">
+      <button class="btn-secondary" onclick="goTo(5)">Back</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentStep = 1;
+
+  // ── Chip interaction ──────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.chip').forEach(function(chip) {
+      chip.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (chip.classList.contains('single')) {
+          const group = chip.getAttribute('data-group');
+          document.querySelectorAll('.chip.single[data-group="' + group + '"]').forEach(function(c) {
+            c.classList.remove('selected');
+          });
+          chip.classList.add('selected');
+        } else if (chip.classList.contains('multi')) {
+          chip.classList.toggle('selected');
+        }
+      });
+    });
+  });
+
+  // ── Step navigation ───────────────────────────────────────────
+  function goTo(n) {
+    document.getElementById('s' + currentStep).classList.remove('active');
+    currentStep = n;
+    document.getElementById('s' + n).classList.add('active');
+
+    for (var i = 1; i <= 6; i++) {
+      var fill = document.getElementById('p' + i);
+      fill.className = 'prog-fill' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+    document.getElementById('prog-label').textContent = 'Step ' + n + ' of 6';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (n === 6) buildSummary();
+  }
+
+  // ── People rows ───────────────────────────────────────────────
+  function addPerson() {
+    var list = document.getElementById('people-list');
+    var row = document.createElement('div');
+    row.className = 'person-row';
+    row.innerHTML = '<input type="text" placeholder="Name"><input type="text" placeholder="Birthday · anniversary · what to remember"><button class="remove-btn" onclick="removePerson(this)" title="Remove">&times;</button>';
+    list.appendChild(row);
+  }
+
+  function removePerson(btn) {
+    var list = document.getElementById('people-list');
+    if (list.querySelectorAll('.person-row').length > 1) {
+      btn.closest('.person-row').remove();
+    }
+  }
+
+  // ── Chip reader ───────────────────────────────────────────────
+  function getSelected(groupId) {
+    var chips = document.querySelectorAll('#' + groupId + ' .chip.selected');
+    return Array.from(chips).map(function(c) { return c.textContent.trim(); }).join(', ');
+  }
+
+  // ── Build summary ─────────────────────────────────────────────
+  function buildSummary() {
+    var name  = document.getElementById('f-name').value.trim();
+    var city  = document.getElementById('f-city').value.trim();
+    var life  = document.getElementById('f-life').value.trim();
+    var needs = getSelected('cg-brain');
+    var youParts = [name, city, life, needs ? 'Needs: ' + needs : ''].filter(Boolean);
+    document.getElementById('sum-you').textContent = youParts.join(' · ') || '—';
+
+    var meds   = document.getElementById('f-meds').value.trim();
+    var docs   = document.getElementById('f-docs').value.trim();
+    var hother = document.getElementById('f-hother').value.trim();
+    var hlead  = getSelected('cg-hlead');
+    var hParts = [
+      meds   ? 'Medications: ' + meds.substring(0, 60) : '',
+      docs   ? 'Doctors: ' + docs.substring(0, 60) : '',
+      hlead  ? 'Reminders ' + hlead + ' ahead' : '',
+      hother ? hother.substring(0, 80) : ''
+    ].filter(Boolean);
+    document.getElementById('sum-health').textContent = hParts.join(' · ') || '—';
+
+    var rows = document.querySelectorAll('#people-list .person-row');
+    var people = [];
+    rows.forEach(function(r) {
+      var n = r.querySelector('input').value.trim();
+      if (n) people.push(n);
+    });
+    var blead = getSelected('cg-blead');
+    var gift  = getSelected('cg-gift');
+    var pParts = [
+      people.length ? people.join(', ') : '',
+      blead ? blead + ' reminder lead time' : '',
+      gift  ? 'Gifts: ' + gift : ''
+    ].filter(Boolean);
+    document.getElementById('sum-people').textContent = pParts.join(' · ') || '—';
+
+    var artists   = document.getElementById('f-artists').value.trim();
+    var festivals = document.getElementById('f-festivals').value.trim();
+    var cult      = getSelected('cg-cult');
+    var cultEl    = document.getElementById('sum-culture');
+    var tags = '';
+    var allCult = [];
+    if (artists)   artists.split(',').forEach(function(a) { if (a.trim()) allCult.push(a.trim()); });
+    if (festivals) festivals.split(',').forEach(function(f) { if (f.trim()) allCult.push(f.trim()); });
+    if (cult)      cult.split(', ').forEach(function(c) { allCult.push(c); });
+    allCult.slice(0, 12).forEach(function(t) {
+      tags += '<span class="sum-tag">' + t + '</span>';
+    });
+    cultEl.innerHTML = tags || '—';
+
+    var car       = document.getElementById('f-car').value.trim();
+    var passport  = document.getElementById('f-passport').value.trim();
+    var admin     = document.getElementById('f-admin').value.trim();
+    var appt      = getSelected('cg-appt');
+    var providers = document.getElementById('f-providers').value.trim();
+    var aParts = [
+      car       ? 'Car: ' + car.substring(0, 50) : '',
+      passport  ? 'Passport exp: ' + passport : '',
+      admin     ? admin.substring(0, 60) : '',
+      appt      ? 'Appointments: ' + appt : '',
+      providers ? 'Providers: ' + providers.substring(0, 60) : ''
+    ].filter(Boolean);
+    document.getElementById('sum-admin').textContent = aParts.join(' · ') || '—';
+  }
+
+  // ── Export profile ────────────────────────────────────────────
+  function exportProfile() {
+    buildSummary();
+
+    var name      = document.getElementById('f-name').value.trim() || 'Not set';
+    var city      = document.getElementById('f-city').value.trim() || 'Not set';
+    var life      = document.getElementById('f-life').value.trim() || 'Not set';
+    var needs     = getSelected('cg-brain') || 'Not set';
+    var meds      = document.getElementById('f-meds').value.trim() || 'Not set';
+    var docs      = document.getElementById('f-docs').value.trim() || 'Not set';
+    var hlead     = getSelected('cg-hlead') || '2 weeks';
+    var hother    = document.getElementById('f-hother').value.trim() || 'None';
+    var artists   = document.getElementById('f-artists').value.trim() || 'Not set';
+    var festivals = document.getElementById('f-festivals').value.trim() || 'Not set';
+    var cult      = getSelected('cg-cult') || 'Not set';
+    var car       = document.getElementById('f-car').value.trim() || 'Not set';
+    var passport  = document.getElementById('f-passport').value.trim() || 'Not set';
+    var admin     = document.getElementById('f-admin').value.trim() || 'Not set';
+    var appt      = getSelected('cg-appt') || 'Morning';
+    var providers = document.getElementById('f-providers').value.trim() || 'Not set';
+    var gift      = getSelected('cg-gift') || 'Not set';
+    var blead     = getSelected('cg-blead') || '2 weeks';
+
+    var rows = document.querySelectorAll('#people-list .person-row');
+    var peopleLines = [];
+    rows.forEach(function(r, i) {
+      var inputs = r.querySelectorAll('input');
+      var n = inputs[0].value.trim();
+      var d = inputs[1].value.trim();
+      if (n) peopleLines.push('  - ' + n + (d ? ': ' + d : ''));
+    });
+
+    var profile = [
+      '# myOS Memory Profile',
+      '# Generated: ' + new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}),
+      '',
+      '## YOU',
+      'name: ' + name,
+      'city: ' + city,
+      'life_context: ' + life,
+      'brain_needs: ' + needs,
+      '',
+      '## HEALTH',
+      'medications: ' + meds,
+      'doctors: ' + docs,
+      'reminder_lead_time: ' + hlead,
+      'health_context: ' + hother,
+      '',
+      '## PEOPLE',
+      'people:',
+      peopleLines.length ? peopleLines.join('\n') : '  (none added)',
+      'birthday_lead_time: ' + blead,
+      'gift_style: ' + gift,
+      '',
+      '## CULTURE',
+      'artists: ' + artists,
+      'festivals: ' + festivals,
+      'track: ' + cult,
+      '',
+      '## LIFE ADMIN',
+      'car: ' + car,
+      'passport_expiry: ' + passport,
+      'renewals: ' + admin,
+      'appointment_preference: ' + appt,
+      'preferred_providers: ' + providers,
+      '',
+      '## MEMORY AGENT SEED INSTRUCTION',
+      'You are the myOS Memory Agent. Use this profile as the foundation of everything you know about this person.',
+      'Always apply their preferences silently. Surface things before they become urgent. Use their own words when returning memories to them.',
+      'Never make them feel like they forgot something — frame everything forward.',
+      'This profile grows richer every day. Treat every interaction as new information to absorb.'
+    ].join('\n');
+
+    document.getElementById('export-text').textContent = profile;
+    document.getElementById('export-box').classList.add('show');
+    document.getElementById('export-box').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copyExport() {
+    var text = document.getElementById('export-text').textContent;
+    navigator.clipboard.writeText(text).then(function() {
+      var btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>

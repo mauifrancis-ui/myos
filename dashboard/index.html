@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>myOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple: #534AB7;
+  --purple-light: #EEEDFE;
+  --purple-mid: #7F77DD;
+  --purple-dark: #3C3489;
+  --teal: #0F6E56;
+  --teal-light: #E1F5EE;
+  --teal-mid: #1D9E75;
+  --amber: #854F0B;
+  --amber-light: #FAEEDA;
+  --amber-mid: #EF9F27;
+  --red: #A32D2D;
+  --red-light: #FCEBEB;
+  --red-mid: #E24B4A;
+  --coral: #993C1D;
+  --coral-light: #FAECE7;
+  --gray: #5F5E5A;
+  --gray-light: #F1EFE8;
+  --pink: #72243E;
+  --pink-light: #FBEAF0;
+  --bg: #F5F4F0;
+  --bg-card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-muted: #6B6867;
+  --text-hint: #9B9895;
+  --border: rgba(0,0,0,0.09);
+  --border-mid: rgba(0,0,0,0.15);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-hover: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.07);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* LAYOUT */
+.app { display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--purple);
+  letter-spacing: -0.5px;
+  padding: 0 0.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--teal-mid);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+.nav-section {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-hint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 0.5rem;
+  margin: 1.25rem 0 0.4rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  font-weight: 400;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  user-select: none;
+}
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active { background: var(--purple-light); color: var(--purple); font-weight: 500; }
+.nav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.7; }
+.nav-item.active svg { opacity: 1; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: var(--red-light);
+  color: var(--red);
+}
+.nav-badge.green { background: var(--teal-light); color: var(--teal); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 0.75rem 0.5rem;
+  border-top: 1px solid var(--border);
+}
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-hint);
+  cursor: pointer;
+}
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal-mid); flex-shrink: 0; }
+
+/* MAIN */
+.main {
+  flex: 1;
+  padding: 2rem 2.5rem;
+  max-width: 860px;
+  overflow-y: auto;
+}
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* TOPBAR */
+.topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+.page-greeting { font-size: 24px; font-weight: 500; color: var(--text); letter-spacing: -0.3px; }
+.page-sub { font-size: 13px; color: var(--text-hint); margin-top: 3px; }
+
+/* STAT ROW */
+.stat-row { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin-bottom: 1.75rem; }
+.stat-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+}
+.stat-num { font-size: 24px; font-weight: 500; color: var(--text); }
+.stat-label { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+.stat-sub { font-size: 11px; margin-top: 4px; }
+
+/* READ SECTION */
+.section { margin-bottom: 2rem; }
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-hint);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.section-link {
+  font-size: 12px;
+  color: var(--purple);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0;
+}
+.section-link:hover { text-decoration: underline; }
+
+/* READ LINES */
+.read-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 0;
+}
+.read-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.read-line:last-child { border-bottom: none; }
+.read-line:hover { background: #FAFAF8; }
+.rdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.rd-red{background:var(--red-mid)}.rd-amber{background:var(--amber-mid)}.rd-teal{background:var(--teal-mid)}.rd-purple{background:var(--purple-mid)}.rd-coral{background:#D85A30}
+.read-text { font-size: 14px; color: var(--text); flex: 1; line-height: 1.4; }
+.read-cta {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: filter 0.15s;
+  white-space: nowrap;
+}
+.read-cta:hover { filter: brightness(0.93); }
+.cta-red{background:var(--red-light);color:var(--red)}
+.cta-amber{background:var(--amber-light);color:var(--amber)}
+.cta-teal{background:var(--teal-light);color:var(--teal)}
+.cta-purple{background:var(--purple-light);color:var(--purple-dark)}
+.cta-coral{background:var(--coral-light);color:var(--coral)}
+.cta-green{background:var(--teal-light);color:var(--teal);opacity:0.6;pointer-events:none}
+
+/* APPROVAL CARDS */
+.approval-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.2s, opacity 0.3s;
+  box-shadow: var(--shadow);
+}
+.approval-card:hover { box-shadow: var(--shadow-hover); }
+.approval-card.done { opacity: 0.38; pointer-events: none; }
+.ac-head { padding: 14px 16px 10px; }
+.ac-agent {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--purple);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ac-agent-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.ac-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.ac-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.ac-preview {
+  margin: 0 16px 0;
+  background: #F8F7F5;
+  border-left: 2px solid #C5C2E8;
+  padding: 10px 13px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+  font-style: italic;
+}
+.ac-preview-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--purple);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  font-style: normal;
+}
+.options-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin: 10px 16px 0; }
+.option {
+  background: #F8F7F5;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.option:hover { border-color: var(--border-mid); }
+.option.selected { border-color: var(--purple); background: var(--purple-light); }
+.option.selected .opt-name { color: var(--purple-dark); }
+.option.selected .opt-price { color: var(--purple); }
+.opt-name { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.opt-price { font-size: 13px; font-weight: 500; color: var(--text); }
+.opt-sub { font-size: 11px; color: var(--text-hint); margin-top: 2px; }
+.opt-rec { font-size: 10px; color: var(--teal); background: var(--teal-light); padding: 2px 6px; border-radius: 20px; display: inline-block; margin-top: 4px; }
+.slots-row { display: flex; gap: 7px; margin: 10px 16px 0; flex-wrap: wrap; }
+.slot {
+  font-size: 12px;
+  padding: 5px 13px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-mid);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.slot:hover { border-color: var(--purple-mid); color: var(--purple); }
+.slot.selected { background: var(--purple-light); color: var(--purple); border-color: var(--purple-mid); font-weight: 500; }
+.ac-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 14px;
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.btn-approve {
+  flex: 1;
+  padding: 10px;
+  background: var(--teal-mid);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-approve:hover { background: var(--teal); }
+.btn-sec {
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-sec:hover { background: var(--bg); }
+.confirm-bar {
+  display: none;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  background: var(--teal-light);
+}
+.confirm-bar.show { display: flex; }
+.confirm-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--teal-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.confirm-check svg { width: 9px; height: 9px; }
+.confirm-text { font-size: 13px; color: var(--teal); flex: 1; }
+.undo-btn { font-size: 12px; color: var(--teal); background: none; border: none; cursor: pointer; font-family: inherit; text-decoration: underline; }
+
+/* EVENTS */
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.event-row:first-child { padding-top: 0; }
+.event-row:last-child { border-bottom: none; padding-bottom: 0; }
+.event-date-col { display: flex; flex-direction: column; align-items: center; width: 36px; flex-shrink: 0; }
+.ev-mon { font-size: 10px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.05em; }
+.ev-day { font-size: 20px; font-weight: 500; color: var(--text); line-height: 1.1; }
+.ev-body { flex: 1; }
+.ev-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.ev-sub { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
+.ev-badge { font-size: 11px; padding: 2px 9px; border-radius: var(--radius-pill); flex-shrink: 0; font-weight: 500; }
+
+/* CULTURE */
+.music-hero {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.music-art {
+  width: 48px; height: 48px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.music-art svg { width: 22px; height: 22px; }
+.music-info { flex: 1; }
+.music-name { font-size: 15px; font-weight: 500; color: var(--text); }
+.music-sub { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
+.music-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.music-row-art { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.music-row-art svg { width: 16px; height: 16px; }
+.music-row-body { flex: 1; }
+.music-row-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.music-row-sub { font-size: 12px; color: var(--text-hint); margin-top: 1px; }
+.row-cta { font-size: 12px; font-weight: 500; padding: 4px 11px; border-radius: var(--radius-pill); border: none; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+
+/* MEMORY VIEW */
+.memory-entry {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.mem-date-col { width: 52px; flex-shrink: 0; text-align: center; }
+.mem-day { font-size: 18px; font-weight: 500; color: var(--text); line-height: 1; }
+.mem-mon { font-size: 10px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+.mem-body { flex: 1; }
+.mem-text { font-size: 13.5px; color: var(--text); line-height: 1.6; }
+.mem-source { font-size: 11px; color: var(--text-hint); margin-top: 5px; }
+.mem-tags { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
+.mem-tag { font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); }
+.mem-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mem-icon svg { width: 13px; height: 13px; }
+
+/* HEALTH VIEW */
+.health-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.health-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.health-icon svg { width: 18px; height: 18px; }
+.health-body { flex: 1; }
+.health-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.health-dose { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.health-next { font-size: 12px; margin-top: 5px; }
+.health-status { font-size: 11px; padding: 3px 10px; border-radius: var(--radius-pill); font-weight: 500; flex-shrink: 0; }
+
+/* GENERIC CARD */
+.plain-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 10px;
+}
+
+/* AGENT CHIPS */
+.agent-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.agent-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg-card);
+  cursor: default;
+}
+.agent-chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal-mid); flex-shrink: 0; }
+
+/* FILTERS */
+.filter-bar { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.filter-btn {
+  font-size: 12px;
+  padding: 5px 13px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-mid);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.filter-btn:hover { background: var(--bg-card); color: var(--text); }
+.filter-btn.on { background: var(--purple-light); color: var(--purple); border-color: #C5C2E8; font-weight: 500; }
+
+/* ARTIST DISCOVER CARD */
+.discover-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.dc-top { padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+.dc-avatar { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+.dc-body { flex: 1; }
+.dc-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.dc-source { font-size: 12px; color: var(--text-hint); margin-bottom: 7px; }
+.dc-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.dc-tag { font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); }
+.dc-score { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; }
+.score-circle { width: 38px; height: 38px; position: relative; }
+.score-circle svg { width: 38px; height: 38px; transform: rotate(-90deg); }
+.score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 11px; font-weight: 600; color: var(--text); }
+.score-lbl { font-size: 10px; color: var(--text-hint); }
+.dc-story { padding: 10px 16px 12px; background: #F8F7F5; border-top: 1px solid var(--border); }
+.dc-story-label { font-size: 10px; font-weight: 600; color: var(--text-hint); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 5px; }
+.dc-story-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+.dc-milestones { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
+.dc-ms { display: flex; gap: 8px; align-items: flex-start; }
+.dc-ms-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dc-ms-text { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+/* PAGE TRANSITIONS */
+.view { animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      myOS
+    </div>
+
+    <div class="nav-section">Today</div>
+    <div class="nav-item active" onclick="showView('briefing',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Morning briefing
+    </div>
+    <div class="nav-item" onclick="showView('queue',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Approval queue
+      <span class="nav-badge">4</span>
+    </div>
+
+    <div class="nav-section">Life</div>
+    <div class="nav-item" onclick="showView('calendar',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Coming up
+    </div>
+    <div class="nav-item" onclick="showView('health',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Health
+      <span class="nav-badge">1</span>
+    </div>
+    <div class="nav-item" onclick="showView('finance',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Bills & payments
+    </div>
+
+    <div class="nav-section">Culture</div>
+    <div class="nav-item" onclick="showView('culture',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Music & shows
+      <span class="nav-badge green">2</span>
+    </div>
+    <div class="nav-item" onclick="showView('discoveries',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Festival discoveries
+    </div>
+
+    <div class="nav-section">Memory</div>
+    <div class="nav-item" onclick="showView('memory',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      My memory
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sync-status">
+        <div class="sync-dot"></div>
+        5 agents ready · synced 6:58am
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- BRIEFING VIEW -->
+    <div class="view active" id="view-briefing">
+      <div class="topbar">
+        <div>
+          <div class="page-greeting">Good morning</div>
+          <div class="page-sub">Tuesday, April 2 · Austin, TX · 74° and sunny</div>
+        </div>
+        <div class="agent-chips">
+          <div class="agent-chip"><div class="agent-chip-dot"></div>brief</div>
+          <div class="agent-chip"><div class="agent-chip-dot"></div>tasks</div>
+          <div class="agent-chip"><div class="agent-chip-dot"></div>culture</div>
+          <div class="agent-chip"><div class="agent-chip-dot"></div>admin</div>
+          <div class="agent-chip"><div class="agent-chip-dot"></div>memory</div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-num">4</div><div class="stat-label">awaiting approval</div></div>
+        <div class="stat-card"><div class="stat-num">14</div><div class="stat-label">emails scanned</div></div>
+        <div class="stat-card"><div class="stat-num">2</div><div class="stat-label">culture alerts</div></div>
+        <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">life admin items</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><span class="section-label">today's read</span></div>
+        <div class="read-card">
+          <div class="read-line">
+            <div class="rdot rd-red"></div>
+            <div class="read-text">Jamie needs your Q2 design feedback. Draft's ready.</div>
+            <button class="read-cta cta-red" onclick="markDone(this,'Sending...')">Send now</button>
+          </div>
+          <div class="read-line">
+            <div class="rdot rd-amber"></div>
+            <div class="read-text">Travis County property tax due in 18 days — $3,240.</div>
+            <button class="read-cta cta-amber" onclick="markDone(this,'Opening...')">Pay now</button>
+          </div>
+          <div class="read-line">
+            <div class="rdot rd-amber"></div>
+            <div class="read-text">Coachella lineup drops Friday — hotel prices will jump.</div>
+            <button class="read-cta cta-amber" onclick="markDone(this,'Searching...')">Book now</button>
+          </div>
+          <div class="read-line">
+            <div class="rdot rd-teal"></div>
+            <div class="read-text">Frank Ocean dropped something new overnight.</div>
+            <button class="read-cta cta-teal" onclick="markDone(this,'Opening...')">Listen now</button>
+          </div>
+          <div class="read-line">
+            <div class="rdot rd-purple"></div>
+            <div class="read-text">Khruangbin setlist leaked. You're seeing them Thursday.</div>
+            <button class="read-cta cta-purple">Peek setlist</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <span class="section-label">coming up this week</span>
+          <button class="section-link" onclick="showView('calendar',document.querySelector('.nav-item:nth-child(5))'))">see all</button>
+        </div>
+        <div class="plain-card">
+          <div class="event-row">
+            <div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">3</span></div>
+            <div class="ev-body"><div class="ev-title">Khruangbin · ACL Live</div><div class="ev-sub">Thursday · doors 7pm · setlist just leaked</div></div>
+            <span class="ev-badge" style="background:var(--purple-light);color:var(--purple-dark)">concert</span>
+          </div>
+          <div class="event-row">
+            <div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">11</span></div>
+            <div class="ev-body"><div class="ev-title">Coachella Weekend 1</div><div class="ev-sub">Indio, CA · hotel pending approval</div></div>
+            <span class="ev-badge" style="background:var(--teal-light);color:var(--teal)">festival</span>
+          </div>
+          <div class="event-row">
+            <div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">14</span></div>
+            <div class="ev-body"><div class="ev-title">Mom's birthday</div><div class="ev-sub">14 days · gift not ordered yet</div></div>
+            <span class="ev-badge" style="background:var(--amber-light);color:var(--amber)">personal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUEUE VIEW -->
+    <div class="view" id="view-queue">
+      <div class="topbar">
+        <div><div class="page-greeting">Approval queue</div><div class="page-sub">4 ready · myOS worked overnight · ~3 min to clear</div></div>
+      </div>
+
+      <div class="approval-card" id="ac1">
+        <div class="ac-head">
+          <div class="ac-agent"><div class="ac-agent-dot" style="background:var(--red-mid)"></div>brief agent · drafted from your last 3 threads with Jamie</div>
+          <div class="ac-title">Reply to Jamie — Q2 design system</div>
+          <div class="ac-desc">Due today · 3 others CC'd · waiting on you</div>
+        </div>
+        <div class="ac-preview">
+          <div class="ac-preview-label">ready to send</div>
+          Hey Jamie — direction feels right overall. Two things before we lock it in: token naming feels inconsistent across the spacing section, and I'd push back on baking motion timings in at this stage. Happy to jump on a call this week if useful.
+        </div>
+        <div class="ac-actions">
+          <button class="btn-approve" onclick="approveCard('ac1','bar1','Reply sent to Jamie ✓')">Send reply</button>
+          <button class="btn-sec">Edit</button>
+          <button class="btn-sec" onclick="dismissCard('ac1')">Skip</button>
+        </div>
+        <div class="confirm-bar" id="bar1">
+          <div class="confirm-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7 8,3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="confirm-text">Reply sent to Jamie</span>
+          <button class="undo-btn" onclick="undoCard('ac1','bar1')">Undo</button>
+        </div>
+      </div>
+
+      <div class="approval-card" id="ac2">
+        <div class="ac-head">
+          <div class="ac-agent"><div class="ac-agent-dot" style="background:var(--amber-mid)"></div>task agent · boutique · 4.9 stars · matches your preferences</div>
+          <div class="ac-title">Coachella W2 hotel · Apr 11–13</div>
+          <div class="ac-desc">Filtered 24 results to 3 boutique picks under $350 · select one to book</div>
+        </div>
+        <div class="options-grid">
+          <div class="option selected" id="o1" onclick="selectOpt('o1',['o1','o2','o3'])">
+            <div class="opt-name">La Maison Hotel</div>
+            <div class="opt-price">$289/night</div>
+            <div class="opt-sub">Palm Springs · 4.9 ★</div>
+            <div class="opt-rec">myOS pick</div>
+          </div>
+          <div class="option" id="o2" onclick="selectOpt('o2',['o1','o2','o3'])">
+            <div class="opt-name">The Willows Inn</div>
+            <div class="opt-price">$320/night</div>
+            <div class="opt-sub">Palm Springs · 4.9 ★</div>
+          </div>
+          <div class="option" id="o3" onclick="selectOpt('o3',['o1','o2','o3'])">
+            <div class="opt-name">Casa Cody</div>
+            <div class="opt-price">$245/night</div>
+            <div class="opt-sub">Palm Springs · 4.6 ★</div>
+          </div>
+        </div>
+        <div class="ac-actions">
+          <button class="btn-approve" onclick="approveCard('ac2','bar2','La Maison Hotel booked · confirmation sent')">Book selected</button>
+          <button class="btn-sec">More options</button>
+          <button class="btn-sec" onclick="dismissCard('ac2')">Skip</button>
+        </div>
+        <div class="confirm-bar" id="bar2">
+          <div class="confirm-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7 8,3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="confirm-text">La Maison Hotel booked · confirmation sent to your email</span>
+          <button class="undo-btn" onclick="undoCard('ac2','bar2')">Undo</button>
+        </div>
+      </div>
+
+      <div class="approval-card" id="ac3">
+        <div class="ac-head">
+          <div class="ac-agent"><div class="ac-agent-dot" style="background:var(--amber-mid)"></div>admin agent · morning slot · your usual location</div>
+          <div class="ac-title">Car service · 3 weeks overdue</div>
+          <div class="ac-desc">Jiffy Lube, South Lamar · held 4 slots · select a time</div>
+        </div>
+        <div class="slots-row">
+          <button class="slot selected" id="s1" onclick="selectSlot('s1',['s1','s2','s3','s4'])">Today 11am</button>
+          <button class="slot" id="s2" onclick="selectSlot('s2',['s1','s2','s3','s4'])">Today 2pm</button>
+          <button class="slot" id="s3" onclick="selectSlot('s3',['s1','s2','s3','s4'])">Today 4:30pm</button>
+          <button class="slot" id="s4" onclick="selectSlot('s4',['s1','s2','s3','s4'])">Tomorrow 9am</button>
+        </div>
+        <div class="ac-actions">
+          <button class="btn-approve" onclick="approveCard('ac3','bar3','Jiffy Lube booked · 11am today · added to calendar')">Confirm booking</button>
+          <button class="btn-sec" onclick="dismissCard('ac3')">Skip</button>
+        </div>
+        <div class="confirm-bar" id="bar3">
+          <div class="confirm-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7 8,3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="confirm-text">Jiffy Lube booked · 11am today · added to calendar</span>
+          <button class="undo-btn" onclick="undoCard('ac3','bar3')">Undo</button>
+        </div>
+      </div>
+
+      <div class="approval-card" id="ac4">
+        <div class="ac-head">
+          <div class="ac-agent"><div class="ac-agent-dot" style="background:var(--amber-mid)"></div>admin agent · experience-led · never generic · 14 days out</div>
+          <div class="ac-title">Mom's birthday gift · Apr 14</div>
+          <div class="ac-desc">3 experience-led ideas based on what you know about her</div>
+        </div>
+        <div class="options-grid">
+          <div class="option selected" id="g1" onclick="selectOpt('g1',['g1','g2','g3'])">
+            <div class="opt-name">Cooking class</div>
+            <div class="opt-price">$120</div>
+            <div class="opt-sub">Hands-on · local · bookable now</div>
+            <div class="opt-rec">myOS pick</div>
+          </div>
+          <div class="option" id="g2" onclick="selectOpt('g2',['g1','g2','g3'])">
+            <div class="opt-name">Spa day</div>
+            <div class="opt-price">$180</div>
+            <div class="opt-sub">Full day · Austin area</div>
+          </div>
+          <div class="option" id="g3" onclick="selectOpt('g3',['g1','g2','g3'])">
+            <div class="opt-name">Botanical garden tour</div>
+            <div class="opt-price">$65</div>
+            <div class="opt-sub">Guided · scenic · relaxed</div>
+          </div>
+        </div>
+        <div class="ac-actions">
+          <button class="btn-approve" onclick="approveCard('ac4','bar4','Cooking class booked for Mom · confirmation sent')">Book for Mom</button>
+          <button class="btn-sec">More ideas</button>
+          <button class="btn-sec" onclick="dismissCard('ac4')">Skip</button>
+        </div>
+        <div class="confirm-bar" id="bar4">
+          <div class="confirm-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7 8,3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="confirm-text">Cooking class booked for Mom · confirmation sent · calendar invite created</span>
+          <button class="undo-btn" onclick="undoCard('ac4','bar4')">Undo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div class="view" id="view-calendar">
+      <div class="topbar"><div><div class="page-greeting">Coming up</div><div class="page-sub">Your life, ahead</div></div></div>
+      <div class="filter-bar">
+        <button class="filter-btn on" onclick="filterEvts(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterEvts(this,'concert')">Concerts</button>
+        <button class="filter-btn" onclick="filterEvts(this,'festival')">Festivals</button>
+        <button class="filter-btn" onclick="filterEvts(this,'personal')">Personal</button>
+        <button class="filter-btn" onclick="filterEvts(this,'admin')">Admin</button>
+      </div>
+      <div class="plain-card" id="events-list">
+        <div class="event-row" data-type="concert"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">3</span></div><div class="ev-body"><div class="ev-title">Khruangbin · ACL Live</div><div class="ev-sub">Thursday · doors 7pm · setlist just leaked</div></div><span class="ev-badge" style="background:var(--purple-light);color:var(--purple-dark)">concert</span></div>
+        <div class="event-row" data-type="festival"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">11</span></div><div class="ev-body"><div class="ev-title">Coachella Weekend 1</div><div class="ev-sub">Apr 11–13 · Indio, CA</div></div><span class="ev-badge" style="background:var(--teal-light);color:var(--teal)">festival</span></div>
+        <div class="event-row" data-type="personal"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">14</span></div><div class="ev-body"><div class="ev-title">Mom's birthday</div><div class="ev-sub">Gift pending approval</div></div><span class="ev-badge" style="background:var(--amber-light);color:var(--amber)">personal</span></div>
+        <div class="event-row" data-type="admin"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">30</span></div><div class="ev-body"><div class="ev-title">Property tax due — $3,240</div><div class="ev-sub">Travis County · 28 days away</div></div><span class="ev-badge" style="background:var(--red-light);color:var(--red)">admin</span></div>
+        <div class="event-row" data-type="concert"><div class="event-date-col"><span class="ev-mon">May</span><span class="ev-day">14</span></div><div class="ev-body"><div class="ev-title">Four Tet · Stubb's Amphitheater</div><div class="ev-sub">Outdoor · tickets not yet purchased</div></div><span class="ev-badge" style="background:var(--purple-light);color:var(--purple-dark)">concert</span></div>
+        <div class="event-row" data-type="admin"><div class="event-date-col"><span class="ev-mon">Aug</span><span class="ev-day">12</span></div><div class="ev-body"><div class="ev-title">Passport expires</div><div class="ev-sub">134 days · admin agent will alert at 90 days</div></div><span class="ev-badge" style="background:var(--red-light);color:var(--red)">admin</span></div>
+      </div>
+    </div>
+
+    <!-- HEALTH VIEW -->
+    <div class="view" id="view-health">
+      <div class="topbar"><div><div class="page-greeting">Health</div><div class="page-sub">Medications and appointments · nothing slips</div></div></div>
+      <div class="section">
+        <div class="section-head"><span class="section-label">medications</span></div>
+        <div class="health-card">
+          <div class="health-icon" style="background:var(--red-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="1.6" stroke-linecap="round"><path d="M18.5 2.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L18.5 2.5z"/></svg></div>
+          <div class="health-body">
+            <div class="health-name">Keppra (Levetiracetam)</div>
+            <div class="health-dose">500mg · twice daily · morning and evening</div>
+            <div class="health-next" style="color:var(--red)">Renewal in 6 days · Walgreens South Lamar has stock</div>
+          </div>
+          <span class="health-status" style="background:var(--red-light);color:var(--red)">refill soon</span>
+        </div>
+        <div class="health-card">
+          <div class="health-icon" style="background:var(--teal-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.6" stroke-linecap="round"><path d="M18.5 2.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L18.5 2.5z"/></svg></div>
+          <div class="health-body">
+            <div class="health-name">Vitamin D3</div>
+            <div class="health-dose">2000 IU · once daily · with food</div>
+            <div class="health-next" style="color:var(--teal)">Renewal in 24 days · good supply</div>
+          </div>
+          <span class="health-status" style="background:var(--teal-light);color:var(--teal)">on track</span>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-head"><span class="section-label">appointments</span></div>
+        <div class="plain-card">
+          <div class="event-row"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">3</span></div><div class="ev-body"><div class="ev-title">Dr. Patel — neurology follow-up</div><div class="ev-sub">UT Dell Medical · 10am · 3 weeks overdue</div></div><span class="ev-badge" style="background:var(--red-light);color:var(--red)">overdue</span></div>
+          <div class="event-row"><div class="event-date-col"><span class="ev-mon">Jun</span><span class="ev-day">15</span></div><div class="ev-body"><div class="ev-title">Dr. Chen — annual checkup</div><div class="ev-sub">Scheduled · 10 weeks away</div></div><span class="ev-badge" style="background:var(--teal-light);color:var(--teal)">confirmed</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANCE VIEW -->
+    <div class="view" id="view-finance">
+      <div class="topbar"><div><div class="page-greeting">Bills & payments</div><div class="page-sub">Extracted from your inbox · nothing due goes unnoticed</div></div></div>
+      <div class="filter-bar">
+        <button class="filter-btn on" onclick="filterBills(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterBills(this,'upcoming')">Upcoming</button>
+        <button class="filter-btn" onclick="filterBills(this,'paid')">Paid</button>
+        <button class="filter-btn" onclick="filterBills(this,'recurring')">Recurring</button>
+      </div>
+      <div class="plain-card" id="bills-list">
+        <div class="event-row" data-bstatus="upcoming"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">30</span></div><div class="ev-body"><div class="ev-title">Travis County Property Tax</div><div class="ev-sub">$3,240 · 28 days · extracted from email</div></div><span class="ev-badge" style="background:var(--red-light);color:var(--red)">tax</span></div>
+        <div class="event-row" data-bstatus="upcoming"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">11</span></div><div class="ev-body"><div class="ev-title">Adobe Creative Cloud renewal</div><div class="ev-sub">$599/year · 9 days · auto-renews</div></div><span class="ev-badge" style="background:var(--amber-light);color:var(--amber)">subscription</span></div>
+        <div class="event-row" data-bstatus="paid"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">1</span></div><div class="ev-body"><div class="ev-title">Electricity bill</div><div class="ev-sub">$127 · paid · Austin Energy · confirmation received</div></div><span class="ev-badge" style="background:var(--teal-light);color:var(--teal)">paid</span></div>
+        <div class="event-row" data-bstatus="recurring"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">15</span></div><div class="ev-body"><div class="ev-title">Internet — AT&T Fiber</div><div class="ev-sub">$65/month · recurring · auto-pay on</div></div><span class="ev-badge" style="background:var(--gray-light);color:var(--gray)">recurring</span></div>
+        <div class="event-row" data-bstatus="upcoming"><div class="event-date-col"><span class="ev-mon">Apr</span><span class="ev-day">20</span></div><div class="ev-body"><div class="ev-title">Studio Eleven invoice — outstanding</div><div class="ev-sub">$1,800 · 14 days overdue · no response yet</div></div><span class="ev-badge" style="background:var(--red-light);color:var(--red)">overdue</span></div>
+      </div>
+    </div>
+
+    <!-- CULTURE VIEW -->
+    <div class="view" id="view-culture">
+      <div class="topbar"><div><div class="page-greeting">Music & shows</div><div class="page-sub">Your culture layer · tracked automatically</div></div></div>
+      <div class="section">
+        <div class="section-head"><span class="section-label">new drops</span></div>
+        <div class="music-hero">
+          <div class="music-art" style="background:var(--purple-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/></svg></div>
+          <div class="music-info">
+            <div class="music-name">Frank Ocean</div>
+            <div class="music-sub">New single dropped overnight · culture agent flagged immediately</div>
+          </div>
+          <button class="read-cta cta-teal">Listen now</button>
+        </div>
+        <div class="music-row">
+          <div class="music-row-art" style="background:var(--teal-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/></svg></div>
+          <div class="music-row-body"><div class="music-row-name">Tame Impala — Deadbeat</div><div class="music-row-sub">Out now · polarizing reviews · worth your own take</div></div>
+          <button class="row-cta" style="background:var(--teal-light);color:var(--teal)">Listen</button>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-head"><span class="section-label">upcoming shows</span></div>
+        <div class="music-row">
+          <div class="music-row-art" style="background:var(--purple-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/></svg></div>
+          <div class="music-row-body"><div class="music-row-name">Khruangbin · ACL Live</div><div class="music-row-sub">Thursday Apr 3 · 8pm · setlist leaked</div></div>
+          <button class="row-cta" style="background:var(--purple-light);color:var(--purple-dark)">Setlist</button>
+        </div>
+        <div class="music-row">
+          <div class="music-row-art" style="background:var(--teal-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/></svg></div>
+          <div class="music-row-body"><div class="music-row-name">Four Tet · Stubb's Amphitheater</div><div class="music-row-sub">May 14 · outdoor · just announced</div></div>
+          <button class="row-cta" style="background:var(--teal-light);color:var(--teal)">Get tickets</button>
+        </div>
+        <div class="music-row">
+          <div class="music-row-art" style="background:var(--amber-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/></svg></div>
+          <div class="music-row-body"><div class="music-row-name">Arooj Aftab · Austin date TBC</div><div class="music-row-sub">Culture agent watching · will alert when confirmed</div></div>
+          <button class="row-cta" style="background:var(--gray-light);color:var(--gray);opacity:0.7">Watching</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISCOVERIES VIEW -->
+    <div class="view" id="view-discoveries">
+      <div class="topbar"><div><div class="page-greeting">Festival discoveries</div><div class="page-sub">11 artists found · 4 became core · 5 festivals sourced</div></div></div>
+      <div class="filter-bar">
+        <button class="filter-btn on" onclick="filterDisc(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterDisc(this,'core')">Core artists</button>
+        <button class="filter-btn" onclick="filterDisc(this,'deep')">Deep listening</button>
+        <button class="filter-btn" onclick="filterDisc(this,'casual')">Casual follow</button>
+        <button class="filter-btn" onclick="filterDisc(this,'faded')">Faded</button>
+      </div>
+
+      <div class="discover-card" data-dstatus="core">
+        <div class="dc-top">
+          <div class="dc-avatar" style="background:var(--purple-light);color:var(--purple-dark)">KH</div>
+          <div class="dc-body">
+            <div class="dc-name">Khruangbin</div>
+            <div class="dc-source">ACL Festival 2022 · supporting slot · second stage</div>
+            <div class="dc-tags"><span class="dc-tag" style="background:var(--purple-light);color:var(--purple-dark)">core artist</span><span class="dc-tag" style="background:var(--pink-light);color:var(--pink)">seen 3× since</span></div>
+          </div>
+          <div class="dc-score">
+            <div class="score-circle"><svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#E0DDD8" stroke-width="3"/><circle cx="19" cy="19" r="15" fill="none" stroke="#534AB7" stroke-width="3" stroke-dasharray="94 100"/></svg><div class="score-num">10</div></div>
+            <div class="score-lbl">score</div>
+          </div>
+        </div>
+        <div class="dc-story">
+          <div class="dc-story-label">what happened</div>
+          <div class="dc-story-text">The discovery that changed your listening permanently. Caught the last 20 minutes by accident and bought tickets to see them properly within a week.</div>
+          <div class="dc-milestones">
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--purple-mid)"></div><div class="dc-ms-text">Oct 2022 · ACL · discovered · stayed for full set</div></div>
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--purple-mid)"></div><div class="dc-ms-text">Nov 2022 · Stubb's · first solo show · "one of the best nights"</div></div>
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--teal-mid)"></div><div class="dc-ms-text">Mar 2026 · ACL Live · "absolutely incredible. want to go again."</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="discover-card" data-dstatus="core">
+        <div class="dc-top">
+          <div class="dc-avatar" style="background:var(--teal-light);color:var(--teal)">FT</div>
+          <div class="dc-body">
+            <div class="dc-name">Four Tet</div>
+            <div class="dc-source">Primavera Sound 2019 · late night set · Heineken stage</div>
+            <div class="dc-tags"><span class="dc-tag" style="background:var(--teal-light);color:var(--teal)">core artist</span><span class="dc-tag" style="background:var(--pink-light);color:var(--pink)">seen 4× since</span></div>
+          </div>
+          <div class="dc-score">
+            <div class="score-circle"><svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#E0DDD8" stroke-width="3"/><circle cx="19" cy="19" r="15" fill="none" stroke="#0F6E56" stroke-width="3" stroke-dasharray="90 100"/></svg><div class="score-num">9.5</div></div>
+            <div class="score-lbl">score</div>
+          </div>
+        </div>
+        <div class="dc-story">
+          <div class="dc-story-label">what happened</div>
+          <div class="dc-story-text">A 2am Primavera set that rewired how you listen to electronic music. Seen 4 times since — always outdoor or intimate venues, never an arena.</div>
+          <div class="dc-milestones">
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--teal-mid)"></div><div class="dc-ms-text">Jun 2019 · Primavera · 2am · stayed until close</div></div>
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--teal-mid)"></div><div class="dc-ms-text">Oct 2024 · Stubb's · "always intimate even when it's big"</div></div>
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--amber-mid)"></div><div class="dc-ms-text">May 2026 · Stubb's · just announced · get tickets</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="discover-card" data-dstatus="deep">
+        <div class="dc-top">
+          <div class="dc-avatar" style="background:var(--pink-light);color:var(--pink)">AA</div>
+          <div class="dc-body">
+            <div class="dc-name">Arooj Aftab</div>
+            <div class="dc-source">Coachella 2025 · Gobi tent · early afternoon</div>
+            <div class="dc-tags"><span class="dc-tag" style="background:var(--amber-light);color:var(--amber)">deep listening</span><span class="dc-tag" style="background:var(--gray-light);color:var(--gray)">not seen since</span></div>
+          </div>
+          <div class="dc-score">
+            <div class="score-circle"><svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#E0DDD8" stroke-width="3"/><circle cx="19" cy="19" r="15" fill="none" stroke="#D4537E" stroke-width="3" stroke-dasharray="70 100"/></svg><div class="score-num">7.4</div></div>
+            <div class="score-lbl">score</div>
+          </div>
+        </div>
+        <div class="dc-story">
+          <div class="dc-story-label">what happened</div>
+          <div class="dc-story-text">Stumbled in and didn't leave. Mughal Garden and Vulture Prince on heavy rotation for two months. No Austin dates yet — culture agent watching.</div>
+          <div class="dc-milestones">
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:#D4537E"></div><div class="dc-ms-text">Apr 2025 · Coachella · stayed full set · immediate deep dive</div></div>
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--amber-mid)"></div><div class="dc-ms-text">No Austin shows yet · myOS watching</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="discover-card" data-dstatus="faded">
+        <div class="dc-top">
+          <div class="dc-avatar" style="background:var(--gray-light);color:var(--gray)">FA</div>
+          <div class="dc-body">
+            <div class="dc-name">Fred again..</div>
+            <div class="dc-source">Coachella 2025 · main stage · closing set</div>
+            <div class="dc-tags"><span class="dc-tag" style="background:var(--gray-light);color:var(--gray)">faded</span><span class="dc-tag" style="background:var(--gray-light);color:var(--gray)">massive now</span></div>
+          </div>
+          <div class="dc-score">
+            <div class="score-circle"><svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#E0DDD8" stroke-width="3"/><circle cx="19" cy="19" r="15" fill="none" stroke="#888780" stroke-width="3" stroke-dasharray="22 100"/></svg><div class="score-num">2.2</div></div>
+            <div class="score-lbl">score</div>
+          </div>
+        </div>
+        <div class="dc-story">
+          <div class="dc-story-label">what happened</div>
+          <div class="dc-story-text">Spectacular live show, didn't translate to home listening. Streamed for 3 weeks then it faded. Not every festival discovery sticks — and that's fine.</div>
+          <div class="dc-milestones">
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--gray)"></div><div class="dc-ms-text">Apr 2025 · great live experience · didn't translate</div></div>
+            <div class="dc-ms"><div class="dc-ms-dot" style="background:var(--gray)"></div><div class="dc-ms-text">Low priority · no active tracking</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMORY VIEW -->
+    <div class="view" id="view-memory">
+      <div class="topbar"><div><div class="page-greeting">My memory</div><div class="page-sub">247 entries · your life, held</div></div></div>
+      <div class="filter-bar">
+        <button class="filter-btn on">All</button>
+        <button class="filter-btn">Culture</button>
+        <button class="filter-btn">Commitments</button>
+        <button class="filter-btn">Health</button>
+        <button class="filter-btn">Feelings</button>
+        <button class="filter-btn">Keep forever</button>
+      </div>
+
+      <div class="memory-entry">
+        <div class="mem-date-col"><div class="mem-day">27</div><div class="mem-mon">Mar</div></div>
+        <div class="mem-body">
+          <div class="mem-text">"Absolutely incredible. The light show during Mordechai was unlike anything. Want to go again next time they're in Austin without question."</div>
+          <div class="mem-source">You · quick capture · 11:47pm · Khruangbin at ACL Live</div>
+          <div class="mem-tags"><span class="mem-tag" style="background:var(--purple-light);color:var(--purple-dark)">culture</span><span class="mem-tag" style="background:var(--pink-light);color:var(--pink)">concert</span><span class="mem-tag" style="background:var(--teal-light);color:var(--teal)">keep forever</span></div>
+        </div>
+        <div class="mem-icon" style="background:var(--purple-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+      </div>
+
+      <div class="memory-entry">
+        <div class="mem-date-col"><div class="mem-day">22</div><div class="mem-mon">Mar</div></div>
+        <div class="mem-body">
+          <div class="mem-text">Told Sarah I'd come to her gallery opening on April 20. She seemed genuinely excited.</div>
+          <div class="mem-source">You · captured from Gmail thread · commitment logged</div>
+          <div class="mem-tags"><span class="mem-tag" style="background:var(--amber-light);color:var(--amber)">commitment</span><span class="mem-tag" style="background:var(--gray-light);color:var(--gray)">Sarah</span></div>
+        </div>
+        <div class="mem-icon" style="background:var(--amber-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+      </div>
+
+      <div class="memory-entry">
+        <div class="mem-date-col"><div class="mem-day">28</div><div class="mem-mon">Feb</div></div>
+        <div class="mem-body">
+          <div class="mem-text">"Felt really good about the Q1 design presentation today. Remember this feeling when imposter syndrome hits."</div>
+          <div class="mem-source">You · evening capture · flagged as keep forever</div>
+          <div class="mem-tags"><span class="mem-tag" style="background:var(--purple-light);color:var(--purple-dark)">feeling</span><span class="mem-tag" style="background:var(--teal-light);color:var(--teal)">keep forever</span></div>
+        </div>
+        <div class="mem-icon" style="background:var(--teal-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+      </div>
+
+      <div class="memory-entry">
+        <div class="mem-date-col"><div class="mem-day">12</div><div class="mem-mon">Feb</div></div>
+        <div class="mem-body">
+          <div class="mem-text">Neurology appointment with Dr. Patel. Keppra dosage unchanged. Next follow-up due in 8 weeks — schedule by April 8.</div>
+          <div class="mem-source">myOS · extracted from calendar and email confirmation</div>
+          <div class="mem-tags"><span class="mem-tag" style="background:var(--red-light);color:var(--red)">health</span><span class="mem-tag" style="background:var(--gray-light);color:var(--gray)">Dr. Patel</span></div>
+        </div>
+        <div class="mem-icon" style="background:var(--red-light)"><svg viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="1.5" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+      </div>
+
+      <div style="padding: 12px 0; font-size: 13px; color: var(--text-hint); text-align: center;">
+        243 more entries · oldest from March 2021
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── Navigation ────────────────────────────────────────────────
+function showView(id, navEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) {
+        n.classList.add('active');
+      }
+    });
+  }
+}
+
+// ── Briefing CTAs ─────────────────────────────────────────────
+function markDone(btn, msg) {
+  var orig = btn.textContent;
+  btn.textContent = msg;
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
+  setTimeout(function() {
+    btn.closest('.read-line').style.opacity = '0.4';
+    btn.closest('.read-line').style.pointerEvents = 'none';
+  }, 800);
+}
+
+// ── Approval queue ────────────────────────────────────────────
+function approveCard(cardId, barId, msg) {
+  var card = document.getElementById(cardId);
+  var bar = document.getElementById(barId);
+  card.classList.add('done');
+  bar.classList.add('show');
+  bar.querySelector('.confirm-text').textContent = msg;
+  card.querySelector('.ac-actions').style.display = 'none';
+}
+
+function undoCard(cardId, barId) {
+  var card = document.getElementById(cardId);
+  var bar = document.getElementById(barId);
+  card.classList.remove('done');
+  bar.classList.remove('show');
+  card.querySelector('.ac-actions').style.display = 'flex';
+}
+
+function dismissCard(cardId) {
+  var card = document.getElementById(cardId);
+  card.classList.add('done');
+  card.querySelector('.ac-actions').style.display = 'none';
+}
+
+function selectOpt(id, group) {
+  group.forEach(function(g) { document.getElementById(g).classList.remove('selected'); });
+  document.getElementById(id).classList.add('selected');
+}
+
+function selectSlot(id, group) {
+  group.forEach(function(g) { document.getElementById(g).classList.remove('selected'); });
+  document.getElementById(id).classList.add('selected');
+}
+
+// ── Filters ───────────────────────────────────────────────────
+function filterEvts(btn, type) {
+  document.querySelectorAll('.filter-bar .filter-btn').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+  document.querySelectorAll('#events-list .event-row').forEach(function(row) {
+    if (type === 'all' || row.getAttribute('data-type') === type) {
+      row.style.display = 'flex';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+function filterBills(btn, status) {
+  document.querySelectorAll('.filter-bar .filter-btn').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+  document.querySelectorAll('#bills-list .event-row').forEach(function(row) {
+    if (status === 'all' || row.getAttribute('data-bstatus') === status) {
+      row.style.display = 'flex';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+function filterDisc(btn, status) {
+  document.querySelectorAll('.filter-bar .filter-btn').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+  document.querySelectorAll('.discover-card').forEach(function(card) {
+    if (status === 'all' || card.getAttribute('data-dstatus') === status) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+</script>
+
+</body>
+</html>
